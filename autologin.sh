@@ -56,7 +56,7 @@ YELLOW='\033[1;33m'
 connectivity_state_count=0
 try_connect_interval=3 # in second
 
-function openssl_check() {
+openssl_check() {
     OS_VERSION=$(lsb_release -rs)
     OS_VERSINFO=$(lsb_release -rs|cut -d . -f 1)
     SSL_CONF=$(grep openssl_conf /etc/ssl/openssl.cnf)
@@ -69,7 +69,7 @@ function openssl_check() {
 }
 
 # https://superuser.com/a/1659582
-function connectivity_check() {
+connectivity_check() {
     local RESPONSE_CODE
     if command -v curl &> /dev/null
     then
@@ -88,7 +88,7 @@ function connectivity_check() {
     fi
 }
 
-function log_in_captive_portal() {
+log_in_captive_portal() {
     if [ "$EID" == "foo" ] || [ "$PASSWORD" == "bar" ]; then
 	echo -e ${RED}ACTION REQUIRED: Enter your EID and PASSWORD.${NOCOLOR}
 	echo "Modify the login script to replace the EID and PASSWORD in the following lines:"
@@ -106,7 +106,7 @@ function log_in_captive_portal() {
     fi
 }
 
-function log_out_captive_portal()
+log_out_captive_portal()
 {
     if ! command -v curl &> /dev/null
     then
@@ -117,7 +117,7 @@ function log_out_captive_portal()
     curl --tlsv1 --insecure --silent --output /dev/null 'http://cp.cs.cityu.edu.hk:16978/logout.html'
 }
 
-function check_and_login()
+check_and_login()
 {
     for run in {1..3}; do
 	connectivity_check
