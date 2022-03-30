@@ -46,7 +46,7 @@ display_help()
 # URL that returns HTTP response code of 204 (No Content)
 # More URLs for detecting captive portals can be found here:
 # https://wiki.ding.net/index.php?title=Detecting_captive_portals
-URL=https://cp.cloudflare.com
+URL=http://cp.cloudflare.com/generate_204
 
 NOCOLOR='\033[0m'
 RED='\033[0;31m'
@@ -77,15 +77,15 @@ function connectivity_check() {
     fi
 
     local RESPONSE_CODE
-    RESPONSE_CODE=$(curl --silent --max-time 3 --output /dev/null --write-out "%{response_code}" "$@")
+    RESPONSE_CODE=$(curl --silent --max-time 3 --output /dev/null --write-out "%{response_code}" "$URL")
 
     RESPONSE_CODE=${RESPONSE_CODE##+(0)}
 
     if (( RESPONSE_CODE >= 200 )) && (( RESPONSE_CODE <= 299 )) ; then
-	echo "[TEST] Internet connection: success"
+	echo -e "Network status: ${GREEN}You're connected to the Internet.${NOCOLOR}"
     else
 	let "connectivity_state_count+=1"
-	echo "[TEST] Internet connection: fail"
+	echo -e "Network status: ${RED}No Internet access.${NOCOLOR}"
     fi
 }
 
@@ -123,7 +123,7 @@ function log_out_captive_portal()
 function check_and_login()
 {
     for run in {1..3}; do
-	connectivity_check $URL
+	connectivity_check
 	if [[ "$connectivity_state_count" -gt 0 ]]; then
 	    sleeptime=$(( 2*run ))
 	    sleep $sleeptime
@@ -136,18 +136,18 @@ function check_and_login()
 	echo -e ${GREEN}You are already logged in.${NOCOLOR}
 	exit 0
     else
-	echo -e ${RED}Internet connection failed.${NOCOLOR}
+	echo -e ${RED}No Internet access.${NOCOLOR}
     fi
 
     for try in {1..3}; do
 	log_in_captive_portal
 	connectivity_state_count=0
-	connectivity_check $URL
+	connectivity_check
 	if [[ "$connectivity_state_count" -eq 0 ]]; then
 	    echo -e ${GREEN}Log in success.${NOCOLOR}
 	    break
 	fi
-	echo -e ${RED}Error: Log in failed, will try again in $try_connect_interval seconds.${NOCOLOR}
+	echo -e ${RED}Log in failed, will try again in $try_connect_interval seconds.${NOCOLOR}
 	sleep $try_connect_interval
 	try_connect_interval=$(( 2*try_connect_interval ))
     done
@@ -163,6 +163,7 @@ while getopts ":chio" option; do
 	    exit;;
 	i) # log in
 	    log_in_captive_portal
+	    command -v curl >/dev/null 2>&1 && check_and_login
 	    exit;;
 	o) # log out
 	    log_out_captive_portal
@@ -175,3 +176,4 @@ while getopts ":chio" option; do
 done
 
 log_in_captive_portal
+command -v curl >/dev/null 2>&1 && check_and_login
