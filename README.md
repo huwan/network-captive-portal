@@ -24,5 +24,16 @@ o     Log out network captive portal.
 ```
 Hint: `-c` option can be used with [cron job](https://www.hostinger.com/tutorials/cron-job) to automatically check internet connection and log in network captive portal.
 
-### NOTE
+## One-liners
+> Replace EID and PASSWORD below with your CityU EID (without "-c") and password.
+- Use `wget` command
+```
+wget --post-data "username=EID&ctx_pass=PASSWORD&domain_name=CITYUMD&modify=Secure+Login" --delete-after --secure-protocol=TLSv1 --no-check-certificate --auth-no-challenge -q -O/dev/null 'https://cp.cs.cityu.edu.hk:16979/loginform.html?'
+```
+- Use `curl` command
+```
+curl --data "username=EID" --data-urlencode "ctx_pass=PASSWORD" --data "domain_name=CITYUMD" --data "modify=Secure+Login" --tlsv1 --insecure --silent --output /dev/null 'https://cp.cs.cityu.edu.hk:16979/loginform.html?'
+```
+
+## NOTE
 You need to manually lower SSL security level on Ubuntu 20.04 or above in order to connect to network captive portal. Please refer to the comments at the top of this login script for more details.
