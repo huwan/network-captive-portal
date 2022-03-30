@@ -70,22 +70,21 @@ function openssl_check() {
 
 # https://superuser.com/a/1659582
 function connectivity_check() {
-    if ! command -v curl &> /dev/null
-    then
-	echo "Command 'curl' not found, but can be installed with: sudo apt install curl (Ubuntu)"
-	exit
-    fi
-
     local RESPONSE_CODE
-    RESPONSE_CODE=$(curl --silent --max-time 3 --output /dev/null --write-out "%{response_code}" "$URL")
+    if command -v curl &> /dev/null
+    then
+	RESPONSE_CODE=$(curl --silent --max-time 3 --output /dev/null --write-out "%{response_code}" "$URL")
+    else
+	RESPONSE_CODE=$(wget --spider -S -T 1 -t 1 -4 $URL 2>&1 | grep "HTTP/" | awk '{print $2}')
+    fi
 
     RESPONSE_CODE=${RESPONSE_CODE##+(0)}
 
     if (( RESPONSE_CODE >= 200 )) && (( RESPONSE_CODE <= 299 )) ; then
-	echo -e "Network status: ${GREEN}You're connected to the Internet.${NOCOLOR}"
+	echo -e "Testing Internet status: ${GREEN}You're connected to the Internet.${NOCOLOR}"
     else
 	let "connectivity_state_count+=1"
-	echo -e "Network status: ${RED}No Internet access.${NOCOLOR}"
+	echo -e "Testing Internet status: ${RED}No Internet access.${NOCOLOR}"
     fi
 }
 
@@ -103,8 +102,6 @@ function log_in_captive_portal() {
     then
 	curl --data "username=$EID" --data-urlencode "ctx_pass=$PASSWORD" --data "domain_name=CITYUMD" --data "modify=Secure+Login" --tlsv1 --insecure --silent --output /dev/null 'https://cp.cs.cityu.edu.hk:16979/loginform.html?'
     else
-	echo "Command 'curl' not found."
-	echo "Try to log in with command 'wget' for this time."
 	wget --post-data "username=$EID&ctx_pass=$PASSWORD&domain_name=CITYUMD&modify=Secure+Login" --delete-after --secure-protocol=TLSv1 --no-check-certificate --auth-no-challenge -q -O/dev/null 'https://cp.cs.cityu.edu.hk:16979/loginform.html?'
     fi
 }
@@ -163,7 +160,7 @@ while getopts ":chio" option; do
 	    exit;;
 	i) # log in
 	    log_in_captive_portal
-	    command -v curl >/dev/null 2>&1 && check_and_login
+	    check_and_login
 	    exit;;
 	o) # log out
 	    log_out_captive_portal
@@ -176,4 +173,4 @@ while getopts ":chio" option; do
 done
 
 log_in_captive_portal
-command -v curl >/dev/null 2>&1 && check_and_login
+check_and_login
