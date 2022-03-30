@@ -34,12 +34,13 @@ display_help()
 {
     echo "A bash script to log in CityU CS network captive portal."
     echo
-    echo "Syntax: $0 [-h|c|i|o]"
+    echo "Syntax: $0 [-h|c|i|o|t]"
     echo "Options:"
     echo "h     Print this help."
     echo "c     Check internet connection and log in network captive portal."
     echo "i     Log in network captive portal."
     echo "o     Log out network captive portal."
+    echo "t     Test internet connection."
     echo
 }
 
@@ -150,7 +151,7 @@ check_and_login()
     done
 }
 
-while getopts ":chio" option; do
+while getopts ":chiot" option; do
     case $option in
 	h) # display Help
 	    display_help
@@ -164,6 +165,9 @@ while getopts ":chio" option; do
 	    exit;;
 	o) # log out
 	    log_out_captive_portal
+	    exit;;
+	t) # test internet connection
+	    connectivity_check
 	    exit;;
 	\?) # Invalid option
 	    echo -e ${RED}Error: Invalid option.${NOCOLOR}
