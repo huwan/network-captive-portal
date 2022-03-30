@@ -21,7 +21,6 @@ h     Print this help.
 c     Check internet connection and log in network captive portal.
 i     Log in network captive portal.
 o     Log out network captive portal.
-
 ```
 Hint: `-c` option can be used with [cron job](https://www.hostinger.com/tutorials/cron-job) to automatically check internet connection and log in network captive portal.
 
